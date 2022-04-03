@@ -1,5 +1,5 @@
 import { METHOD_GET } from '@lib/controller';
-import * as authService from '@services/authService'
+import * as nftService from '@services/nftService'
 export const tags = ['01.2.메타마스크 로그인'];
 export const summary = '링크';
 
@@ -11,11 +11,13 @@ export const request = {
 export const security = ['any'];
 
 export const params = {
-    path: {},
-    query: { },
+  path: {},
+  query: { },
 };
 
 export const execute = async ({ params }) => {
+  const result = await nftService.getNFTImage(params)
+  return result
 };
 
 export default execute;

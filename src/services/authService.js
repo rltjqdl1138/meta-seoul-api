@@ -1,7 +1,6 @@
 
 import passport from 'passport';
 import jwt from 'jsonwebtoken'
-import axios from 'axios'
 import qs from 'qs';
 import fetch from 'node-fetch'
 
@@ -105,13 +104,39 @@ const LOGOUT_REDIRECT = "/v1/auth/kakao/logout"
 const RESPONSE_TYPE = "code"
 //"https://kauth.kakao.com/oauth/token"
 //"https://kapi.kakao.com/v2/user/me"
-
+const JWT_KEY = "AAAAB3NzaC1yc2EAAAABJQAAAQEA1TE//ahk4phqCAWoTaCRw+KHcKv5/xB/gCBrue6ffxoBMPvG54eBLC3BpDFV9XzJ8t/3NybZ+QUVYu5Iy2+SgMOX5HvWy8AHgIbVc/hVnYK5r6Bv2hom89IDirMjbfZQE4zwCihOROQQqQYiimEdviR5+P1w40cbm5/n79RKvZkr/fnOjMWjjeT1qdXkIC9H2GQhag8GTLTyLG4uAvt19ffc6hdJLqTr4f6Y3RSKkauCe1LpzqEhbuoaoqKtLoW5G0U/+9p4hUJw0TfIqkxrzn9lzArEBszzP2piOwil1Zoykxoy5EaGZvm8A50PgJvHL2ctkTWyfbeFNTJm8qK8PQ=="
 
 export const kakaoAuthLogin = async ({code})=>{
   const {access_token} = await getAccessTokenFromKakao(code)
   const data = await getDataFromKakao(access_token)
-  console.log(data)
-  
+  let kakaoUser;
+  let user = await userDto.getUser(data.id)
+
+  if(!user){
+    // Create new user
+    const args = {
+      uid: data.id,
+      address: `guest-${data.id}`
+    }
+    user = await userDto.registerUser(args)
+  }else{
+    // GET kakao user
+    kakaoUser = await userDto.getKakaoUser(user.seq)
+  }
+  // create new kakao user
+  if(!kakaoUser){
+    const args = {
+      user_seq: user.seq,
+      profile_image_url: data.kakao_account.profile.profile_image_url,
+      nickname: data.properties.nickname,
+      connected_at: data.connected_at,
+      email: data.kakao_account.email,
+    }
+    kakaoUser = await userDto.registerKakaoUser(args)
+  }
+  const token = jwt.sign({ uid: user.uid, seq:user.seq}, JWT_KEY)
+  const parameter = `{\"access_token\":\"${token}\"}`
+  return unrealHTML("login", parameter)
 }
 
 export const kakaoAuthLogout = (params)=>{
@@ -123,7 +148,7 @@ export const kakaoAuthLoginPage = ()=>{
   return pageURL;
 }
 
-const kakaoAuthLogoutPage = ()=>{
+export const kakaoAuthLogoutPage = ()=>{
   const pageURL = LOGOUT_URL+'?' + [`client_id=${CLIENT_ID}`,`redirect_uri=${HOST}${LOGOUT_REDIRECT}`, `response_type=${RESPONSE_TYPE}`].join('&')
   return pageURL;
 }
@@ -149,7 +174,6 @@ const getAccessTokenFromKakao = async(code)=>{
   return data
 }
 
-
 const getDataFromKakao = async(accessToken)=>{
     
   const response = await fetch('https://kapi.kakao.com/v2/user/me',{
@@ -162,3 +186,21 @@ const getDataFromKakao = async(accessToken)=>{
   const data = await response.json()
   return data
 }
+
+export const unrealHTML = (func, data)=>{
+  if(func === "login")
+    return `<!DOCTYPE html><html><head><meta charset='utf-8'>
+<script src='https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js'></script>
+<script src='https://unpkg.com/axios/dist/axios.min.js'></script>
+<script src='/buffer.js'></script>
+<script src='/metamask.js'></script>
+<script>var data='${data}';function s(){ sign(data) }
+setTimeout(()=>{ try{ue.kakao.login(data)}catch(e){ }},1000)</script>
+</head><body><div><button onClick='s()' class='enableEthereumButton'>Login Ethereum</button></div></body>
+</html>`
+
+  if(data.length === 0)
+    return `<html><script>setTimeout(()=>ue.kakao.${func}(),1000)</script></html>`
+  return `<html><script>setTimeout(()=>ue.kakao.${func}('${data}'),1000)</script></html>`
+}
+

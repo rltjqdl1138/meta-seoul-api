@@ -1,19 +1,29 @@
 import mysql from './mysql'
 const query = mysql.query
 
-export const getUser= async(address)=>{
-    const list = await query('SELECT * FROM ether_user WHERE wallet_address=?',[address]) || []
-    return list[0]
-}
-
 export const getUserBySeq= async(seq)=>{
-    const list = await query('SELECT * FROM ether_user WHERE seq=?',[seq]) || []
+  const list = await query('SELECT * FROM user WHERE seq=?',[seq]) || []
+  return list[0]
+}
+
+export const getUser= async(uid)=>{
+    const list = await query('SELECT * FROM user WHERE uid=?',[uid]) || []
     return list[0]
 }
 
+export const getKakaoUser= async(seq)=>{
+  const list = await query('SELECT * FROM kakao_user WHERE user_seq=?',[seq]) || []
+  return list[0]
+}
 
 export const registerUser = async(args)=>{
-    const {address, type} = args
-    await query('INSERT INTO ether_user SET wallet_address=?, wallet_type=?',[address, type])
-    return getUser(address, type)
+  const {uid, address} = args
+  await query('INSERT INTO user SET uid=?, address=?',[uid, address])
+  return getUser(uid)
+}
+
+export const registerKakaoUser = async(args)=>{
+  const {user_seq, profile_image_url, nickname, connected_at} = args
+  await query('INSERT INTO kakao_user SET user_seq=?, profile_image_url=?, nickname=?, connected_at=?',[user_seq, profile_image_url, nickname, connected_at])
+  return getKakaoUser(user_seq)
 }

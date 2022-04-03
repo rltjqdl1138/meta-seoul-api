@@ -14,9 +14,10 @@ export const params = {
   query: {},
 };
 
-export const execute = async ({ params }) => {
-  console.log(params)
-  await authService.kakaoAuthLogin(params)
+export const execute = async (req, res, next) => {
+  const result = await authService.kakaoAuthLogin(req.query)
+  res.setHeader('content-type','text/html')
+  res.end(result)
 };
 
 export default execute;

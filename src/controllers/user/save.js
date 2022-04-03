@@ -16,8 +16,9 @@ export const params = {
     query: {},
 };
 
-export const execute = async ({ params }) => {
-
+export const execute = async ({ params, user, body }) => {
+  const result = await userService.saveData(params, user, body)
+  return result
 };
 
 export default execute;
