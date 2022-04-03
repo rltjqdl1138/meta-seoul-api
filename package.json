@@ -1,0 +1,44 @@
+{
+  "name": "meta-seoul-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ecosystem.config.js",
+  "scripts": {
+    "start": "set NODE_ENV=code&nodemon --exec npx babel-node src/www.js",
+    "build": "babel -d dist src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rltjqdl1138/meta-seoul-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rltjqdl1138/meta-seoul-api/issues"
+  },
+  "homepage": "https://github.com/rltjqdl1138/meta-seoul-api#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/node": "^7.16.8",
+    "@babel/plugin-proposal-decorators": "^7.17.2",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.16.11"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
+    "axios": "^0.26.0",
+    "babel-plugin-root-import": "^6.6.0",
+    "babel-plugin-wildcard": "^7.0.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.1.4",
+    "express": "^4.17.3",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.7",
+    "passport": "^0.5.2",
+    "passport-headerapikey": "^1.2.2",
+    "passport-jwt": "^4.0.0"
+  }
+}
